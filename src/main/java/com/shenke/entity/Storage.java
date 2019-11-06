@@ -169,23 +169,11 @@ public class Storage{
     private String groupName;//班组名称
 
     private Integer dabaonum;//打包数量
-
-    private Boolean lingshou;//零售
-
-    @Column(nullable = true, precision = 2)
-    private Double unitPrice;//单价
-
-    //总价格
-    @Transient
-    private Double totalPrice;//总价格
-
     @Transient
     private Double danjianzhong;
 
     @Transient
     private Double zongzhong;
-
-    private Double pingfang;
 
     @Transient
     private Double danjianpingfang;
@@ -252,12 +240,8 @@ public class Storage{
                 ", clerkName='" + clerkName + '\'' +
                 ", groupName='" + groupName + '\'' +
                 ", dabaonum=" + dabaonum +
-                ", lingshou=" + lingshou +
-                ", unitPrice=" + unitPrice +
-                ", totalPrice=" + totalPrice +
                 ", danjianzhong=" + danjianzhong +
                 ", zongzhong=" + zongzhong +
-                ", pingfang=" + pingfang +
                 ", danjianpingfang=" + danjianpingfang +
                 ", zongpingfang=" + zongpingfang +
                 ", shengyulength=" + shengyulength +
@@ -688,30 +672,6 @@ public class Storage{
         this.dabaonum = dabaonum;
     }
 
-    public Boolean getLingshou() {
-        return lingshou;
-    }
-
-    public void setLingshou(Boolean lingshou) {
-        this.lingshou = lingshou;
-    }
-
-    public Double getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(Double unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public Double getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(Double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
     public Double getDanjianzhong() {
         return danjianzhong;
     }
@@ -726,14 +686,6 @@ public class Storage{
 
     public void setZongzhong(Double zongzhong) {
         this.zongzhong = zongzhong;
-    }
-
-    public Double getPingfang() {
-        return pingfang;
-    }
-
-    public void setPingfang(Double pingfang) {
-        this.pingfang = pingfang;
     }
 
     public Double getDanjianpingfang() {

@@ -1,14 +1,12 @@
 package com.shenke.service.impl;
 
-import java.util.Date;
+import java.util.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 
 import com.shenke.entity.*;
@@ -16,6 +14,7 @@ import com.shenke.repository.*;
 import com.shenke.service.ClientService;
 import com.shenke.util.DateUtil;
 import com.shenke.util.EntityUtils;
+import com.shenke.util.GetResultUtils;
 import com.shenke.util.StringUtil;
 import org.apache.commons.collections.list.PredicatedList;
 import org.springframework.beans.BeanUtils;
@@ -36,6 +35,9 @@ import com.shenke.service.StorageService;
 @Service("storageService")
 @Transactional
 public class StorageServiceImpl implements StorageService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Resource
     private StorageRepository storageRepository;
@@ -70,12 +72,10 @@ public class StorageServiceImpl implements StorageService {
 //        System.out.println(saleListProduct.getUnitPrice());
         BeanUtils.copyProperties(saleListProduct, storage);
 
-        System.out.println(storage.getUnitPrice());
         storage.setId(null);
         storage.setClerk(clerk);
         storage.setGroup(group);
         storage.setRealityweight(realityweight);
-        storage.setShengyulength(storage.getLength() * storage.getDabaonum());
         storage.setDateInProduced(new Date(System.currentTimeMillis()));
         storage.setSaleNumber(saleListProduct.getSaleList().getSaleNumber());
         storage.setState("生产完成:" + storage.getJiTai().getName());
@@ -84,7 +84,6 @@ public class StorageServiceImpl implements StorageService {
         storage.setPrice(storage.getSaleListProduct().getPrice());
         storage.setGroup(storage.getJiTai().getGroup());
         storage.setGroupName(storage.getJiTai().getGroup().getName());
-        storage.setPingfang(storage.getLength() * storage.getModel());
         System.out.println(storage);
         System.out.println(storage.getPrice());
         storageRepository.save(storage);
@@ -105,7 +104,6 @@ public class StorageServiceImpl implements StorageService {
             System.out.println("保存不添加完成数");
             storage.setSaleListProduct(null);
         }
-        System.out.println(storage.getUnitPrice());
         storage.setId(null);
         System.out.println(clerk);
         storage.setClerk(clerk);
@@ -117,11 +115,9 @@ public class StorageServiceImpl implements StorageService {
         storage.setLength(changdu);
         storage.setJiTaiName(storage.getJiTai().getName());
         storage.setClerkName(clerk.getName());
-        storage.setShengyulength(changdu * storage.getDabaonum());
         storage.setGroup(storage.getJiTai().getGroup());
         storage.setGroupName(storage.getJiTai().getGroup().getName());
         storage.setPrice(storage.getPrice());
-        storage.setPingfang(storage.getLength() * storage.getModel());
         System.out.println(storage);
         storageRepository.save(storage);
     }
@@ -279,7 +275,6 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public void save(Storage storage) {
-        storage.setShengyulength(storage.getLength());
         storageRepository.save(storage);
     }
 
@@ -1181,11 +1176,6 @@ public class StorageServiceImpl implements StorageService {
                 predicates.getExpressions().add(cb.equal(root.get("peasant"), storage.getPeasant()));
                 predicates.getExpressions().add(cb.equal(root.get("dabaonum"), storage.getDabaonum()));
                 predicates.getExpressions().add(cb.equal(root.get("clientname"), storage.getClientname()));
-                if (storage.getUnitPrice() != null) {
-                    predicates.getExpressions().add(cb.equal(root.get("unitPrice"), storage.getUnitPrice()));
-                } else {
-                    predicates.getExpressions().add(cb.isNull(root.get("unitPrice")));
-                }
                 predicates.getExpressions().add(cb.like(root.get("state"), "%生产完成%"));
 //                query.groupBy(root.get("saleListProduct").get("id"), root.get("name"), root.get("model"), root.get("price"), root.get("length"), root.get("color"), root.get("realityweight"), root.get("dao"), root.get("peasant"), root.get("clientname"));
                 return predicates;
@@ -1260,6 +1250,207 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void updateState(String state, Integer key) {
         storageRepository.updateState(state, key);
+    }
+
+    @Override
+    public Map<String, Object> selecttt(Storage storage, String dateInProducedd, String dateInProduceddd, Integer page, Integer rows) {
+        Map<String, Object> map = new HashMap<>();
+        String selectSqlStar = "select " +
+                "clientname, " +
+                "peasant, " +
+                "sale_number as saleNumber, " +
+                "name, " +
+                "model, " +
+                "length, " +
+                "price, " +
+                "realityweight as danjianzhong, " +
+                "color, " +
+                "count(id) as sum, " +
+                "ROUND(realityweight * count(id), 2) as zongzhong, " +
+                "dao, " +
+//                "unit_price, " +
+//                "ROUND(unit_price * count(id), 2) as total_price, " +
+                "demand " +
+                "from t_storage where state like '%生产完成%'";
+
+        String selectSqlEnd = "group by " +
+                "sale_list_product_id," +
+                " name, " +
+                "model, " +
+                "price, " +
+                "length , " +
+                "color , " +
+                "realityweight , " +
+                "peasant , " +
+                "clientname , " +
+                "dabaonum " +
+//                "unit_price " +
+                "order by peasant asc, " +
+                "name asc, " +
+                "model asc, " +
+                "price asc, " +
+                "length asc, " +
+                "color asc, " +
+                "realityweight asc";
+
+        String pg = "";
+        if (page != null && rows != null) {
+            Integer star = (page - 1) * rows;
+            pg += " limit " + star + "," + rows + "";
+        }
+
+        //查询总数量
+        String countSqlStart = "select count(id) as b from t_storage where state like '%生产完成%'";
+
+        //查询总重量
+        String sumWeightSqlStar = "select ROUND(sum(realityweight),2) from t_storage where state like '%生产完成%'";
+
+        String sql = "";
+
+        if (StringUtil.isNotEmpty(storage.getSaleNumber())) {
+            sql += " and sale_number like '%" + storage.getSaleNumber() + "'%";
+        }
+        if (StringUtil.isNotEmpty(storage.getName())) {
+            sql += " and name = '" + storage.getName() + "'";
+        }
+        if (storage.getLocation() != null) {
+            sql += " and location = '" + storage.getLocation() + "'";
+        }
+        if (storage.getJiTai() != null) {
+            sql += " and ji_tai_id = " + storage.getJiTai().getId();
+        }
+        if (StringUtil.isNotEmpty(storage.getPeasant())) {
+            sql += " and peasant = '" + storage.getPeasant() + "'";
+        }
+        if (StringUtil.isNotEmpty(dateInProducedd) && StringUtil.isNotEmpty(dateInProduceddd)) {
+            sql += " and date_in_produced BETWEEN '" + dateInProducedd + "'" + "and '" + dateInProduceddd + "'";
+        }
+        if (storage.getClerk() != null) {
+            sql += " and clerk_id = " + storage.getClerk().getId();
+        }
+        if (StringUtil.isNotEmpty(storage.getClientname())) {
+            sql += " and clientname = '" + clientService.findById(Integer.parseInt(storage.getClientname())).getName() + "'";
+        }
+        if (storage.getLength() != null) {
+            sql += " and length = " + storage.getLength();
+        }
+        if (storage.getModel() != null) {
+            sql += " and model = " + storage.getModel();
+        }
+        if (StringUtil.isNotEmpty(storage.getPrice())) {
+            sql += " and price = " + storage.getPrice();
+        }
+        if (storage.getRealityweight() != null) {
+            sql += " and realityweight = " + storage.getRealityweight();
+        }
+        if (StringUtil.isNotEmpty(storage.getColor())) {
+            sql += " and color = '" + storage.getColor() + "'";
+        }
+
+        System.out.println("查询所有的sql语句：");
+        System.out.println(selectSqlStar + sql + selectSqlEnd);
+
+        List result = GetResultUtils.getResult(selectSqlStar + sql + selectSqlEnd + pg, entityManager);
+
+
+        //执行计算总件数的sql
+        System.out.println("查询总件数的sql：");
+        System.out.println(countSqlStart + sql);
+        Integer count = GetResultUtils.getInteger(countSqlStart + sql, entityManager);
+        System.out.println("总件数：" + count);
+
+        //执行查询总重量的sql
+        System.out.println("查询总重量sql：");
+        System.out.println(sumWeightSqlStar + sql);
+        Double totalWeight = GetResultUtils.getDouble(sumWeightSqlStar + sql, entityManager);
+        System.out.println("总重量：" + totalWeight);
+
+        map.put("success", true);
+        map.put("rows", result);
+        map.put("count", count);
+        map.put("totalWeight", totalWeight);
+        map.put("total", GetResultUtils.getResult(selectSqlStar + sql + selectSqlEnd, entityManager).size());
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> detaill(Map<String, Object> map) {
+        Map<String, Object> data = new HashMap<>();
+
+        String selectDataSqlStart = "select clientname, peasant, " +
+                "out_number as outNumber, " +
+                "sale_number as saleNumber, " +
+                "name, " +
+                "model, " +
+                "length, " +
+                "price, " +
+                "count(id) as sum, " +
+                "realityweight as danjianzhong, " +
+                "ROUND(count(id) * realityweight, 2) as zongzhong, " +
+                "color " +
+                "from t_storage " +
+                "where state like '%装车%'";
+
+        String selectDataSqlEnd = " group by sale_list_product_id, " +
+                "name, " +
+                "model, " +
+                "price, " +
+                "length, " +
+                "color, " +
+                "realityweight, " +
+                "dao, " +
+                "peasant, " +
+                "clientname, " +
+                "out_number, " +
+                "dabaonum " +
+                "order by name asc, " +
+                "peasant asc";
+
+        String selectCountSqlStart = "select count(*) from t_storage where state LIKE '%装车%'";
+
+        String selectSumWeightStart = "select ROUND(sum(realityweight), 2) from t_storage where state LIKE '%装车%'";
+
+        String sql = "";
+        if (StringUtil.isNotEmpty((String) map.get("client"))) {
+            sql += " and clientname = '" + map.get("client") + "'";
+        }
+        if (StringUtil.isNotEmpty((String) map.get("peasant"))) {
+            sql += " and peasant = '" + map.get("peasant") + "'";
+        }
+        if (StringUtil.isNotEmpty((String) map.get("product"))) {
+            sql += " and name = '" + map.get("product") + "'";
+        }
+        if (StringUtil.isNotEmpty((String) map.get("chukudanhao"))) {
+            sql += " and out_number = '" + map.get("chukudanhao") + "'";
+        }
+
+        if (StringUtil.isNotEmpty((String) map.get("date"))) {
+            String date = (String) map.get("date");
+            String st = date + " 00:00:00";
+            String ed = date + " 23:59:59";
+            sql += " and date_of_delivery BETWEEN '" + st + "' and '" + ed + "'";
+        }
+
+        //获取所有结果
+        System.out.println("查询的sql");
+        System.out.println(selectDataSqlStart + sql + selectDataSqlEnd);
+        List result = GetResultUtils.getResult(selectDataSqlStart + sql + selectDataSqlEnd, entityManager);
+
+        //获取总数量
+        System.out.println("查询数量sql：");
+        System.out.println(selectCountSqlStart + sql);
+        Integer count = GetResultUtils.getInteger(selectCountSqlStart + sql, entityManager);
+
+        //获取总重量
+        System.out.println("查询总重量sql：");
+        System.out.println(selectSumWeightStart + sql);
+        Double sumweight = GetResultUtils.getDouble(selectSumWeightStart + sql, entityManager);
+
+        data.put("success", true);
+        data.put("rows", result);
+        data.put("count", count);
+        data.put("sumweight", sumweight);
+        return data;
     }
 
 }

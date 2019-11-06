@@ -66,6 +66,8 @@
 
         //按照条件筛选订单信息
         function screenSale() {
+            $("#count").text("总数量：");
+            $("#sumweight").text("总重量：");
             $.messager.progress({
                 title: '提示',
                 text: '数据正在处理中，请稍后....'
@@ -79,6 +81,10 @@
                         if (ruselt.success) {
                             console.log(ruselt);
                             $("#dg").datagrid("loadData", ruselt.rows);
+                            $("#count").text($("#count").text() + ruselt.count + "件");
+                            $("#count").show();
+                            $("#sumweight").text($("#sumweight").text() + ruselt.totalWeight + "kg");
+                            $("#sumweight").show();
                             $.messager.progress("close");
                         }
                     }
@@ -174,16 +180,6 @@
                 }, {
                     field: 'zongzhong',
                     title: '总重量',
-                    width: 100,
-                    align: 'center'
-                }, {
-                    field: 'unitPrice',
-                    title: '单价',
-                    width: 100,
-                    align: 'center'
-                }, {
-                    field: 'totalPrice',
-                    title: '金额',
                     width: 100,
                     align: 'center'
                 }]]
@@ -396,8 +392,6 @@
             var zsumw = 0;
             var count = 0;
             var sumw = 0;
-            var jine = 0;
-            var zongjine = 0;
             for (var i = 0; i < rows.length; i++) {
                 // console.log("长度：" + rows.length);
                 // console.log(nong_hu);
@@ -410,13 +404,11 @@
                         row: {
                             clientname: "小计：",
                             peasant: "总数量：" + count + "件",
-                            name: "总重量：" + sumw.toFixed(2) + "KG",
-                            totalPrice: "总金额：" + jine.toFixed(2) + "元",
+                            name: "总重量：" + sumw.toFixed(2) + "KG"
                         }
                     });
                     count = 0;
                     sumw = 0;
-                    jine = 0;
                     nong_hu = rows[i + 1].peasant;
                     i++;
                 }
@@ -425,15 +417,12 @@
                     count += rows[i].sum;
                     zsumw += rows[i].zongzhong;
                     zcount += rows[i].sum;
-                    jine += rows[i].totalPrice;
-                    zongjine += rows[i].totalPrice;
                     $('#dg').datagrid('insertRow', {
                         index: i + 1,	// index start with 0
                         row: {
                             clientname: "小计：",
                             peasant: "总数量：" + count + "件",
-                            name: "总重量：" + sumw.toFixed(2) + "KG",
-                            totalPrice: "总金额：" + jine.toFixed(2) + "元"
+                            name: "总重量：" + sumw.toFixed(2) + "KG"
                         }
                     });
                     $('#dg').datagrid('insertRow', {
@@ -441,8 +430,7 @@
                         row: {
                             clientname: "总计：",
                             peasant: "总数量：" + zcount + "件",
-                            name: "总重量：" + zsumw.toFixed(2) + "KG",
-                            totalPrice: "总金额：" + zongjine.toFixed(2) + "元"
+                            name: "总重量：" + zsumw.toFixed(2) + "KG"
                         }
                     });
                     return;
@@ -451,8 +439,6 @@
                 count += rows[i].sum;
                 zsumw += rows[i].zongzhong;
                 zcount += rows[i].sum;
-                jine += rows[i].totalPrice;
-                zongjine += rows[i].totalPrice;
             }
         }
 
@@ -568,12 +554,18 @@
                 <!--<td>&nbsp;&nbsp;&nbsp;&nbsp; <a href="javascript:daochu()"-->
                 <!--class="easyui-linkbutton" iconCls="icon-search">导出</a>-->
                 <!--</td>-->
+                <td>
+                    <span id="count" style="display: none;padding-left: 5px;font-size: 18px;color: red;">总数量：</span>
+                </td>
             </tr>
             <tr>
                 <td>
                     &nbsp;&nbsp;&nbsp;&nbsp;结束时间：<input
                             type="text" id="dateInProducedd" name="dateInProduceddd" class="easyui-datetimebox"
                             demandd="true" size="15"/>
+                </td>
+                <td>
+                    <span id="sumweight" style="display: none;padding-left: 5px;font-size: 18px;color: red;">总重量：</span>
                 </td>
             </tr>
         </table>

@@ -201,4 +201,8 @@ public interface StorageService {
     void save(List<Storage> storages);
 
     void updateState(String state, Integer key);
+
+    Map<String, Object> selecttt(Storage storage, String dateInProducedd, String dateInProduceddd, Integer page, Integer rows);
+
+    Map<String, Object> detaill(Map<String, Object> map1);
 }

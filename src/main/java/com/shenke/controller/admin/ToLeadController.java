@@ -51,7 +51,6 @@ public class ToLeadController {
 
     @Resource
     private DaoService daoService;
-
     @Resource
     private BrandService brandService;
 

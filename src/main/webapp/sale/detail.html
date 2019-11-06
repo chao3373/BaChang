@@ -17,10 +17,16 @@
     <script type="text/javascript">
         //点击确定按钮
         function loaddg() {
+            $("#count").text("总数量：");
+            $("#sumweight").text("总重量：");
             addSelect();
             $.post("/admin/storage/detail", json, function (result) {
                 console.log(result);
                 if (result.success) {
+                    $("#count").text($("#count").text() + result.count + "件");
+                    $("#count").show();
+                    $("#sumweight").text($("#sumweight").text() + result.sumweight + "kg");
+                    $("#sumweight").show();
                     $("#dg").datagrid("loadData", result.rows);
                 }
             });
@@ -635,6 +641,15 @@
                     </td>
                     <td>
                         <a class="easyui-linkbutton" iconCls="icon-reload" href="javascript:daochu('#dg')">导出</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span id="count" style="display: none;padding-left: 5px;font-size: 18px;color: red;">总数量：</span>
+                    </td>
+
+                    <td>
+                        <span id="sumweight" style="display: none;padding-left: 5px;font-size: 18px;color: red;">总重量：</span>
                     </td>
                 </tr>
             </table>
