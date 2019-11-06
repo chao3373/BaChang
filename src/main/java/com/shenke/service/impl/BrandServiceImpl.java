@@ -25,7 +25,6 @@ import com.shenke.util.StringUtil;
  */
 @Service("brandService")
 public class BrandServiceImpl implements BrandService{
-
 	@Resource
 	private BrandRepository brandRepository;
 
