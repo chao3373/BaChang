@@ -18,6 +18,7 @@ import com.shenke.service.LogService;
 import com.shenke.service.SaleListProductService;
 import com.shenke.service.StorageService;
 import com.shenke.util.StringUtil;
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -117,7 +119,7 @@ public class StorageAdminController {
         Map<String, Object> map = new HashMap();
         String[] idArr = ids.split(",");
 
-        for(int i = 0; i < idArr.length; ++i) {
+        for (int i = 0; i < idArr.length; ++i) {
             int id = Integer.parseInt(idArr[i]);
             this.logService.save(new Log("审核操作", "准备出库"));
             this.storageService.gai(pandianji, id);
@@ -178,7 +180,7 @@ public class StorageAdminController {
         Map<String, Object> map = new HashMap();
         String[] split = ids.split(",");
 
-        for(int i = 0; i < split.length; ++i) {
+        for (int i = 0; i < split.length; ++i) {
             this.storageService.setLocation(Integer.parseInt(split[i]), location);
         }
 
@@ -300,11 +302,16 @@ public class StorageAdminController {
         return map;
     }
 
+    /***
+     * 机台产量查询
+     * @param storage
+     * @param dateInProducedd
+     * @return
+     */
     @RequestMapping({"/JitaiProduct"})
     public Map<String, Object> JitaiProduct(Storage storage, String dateInProducedd) {
         System.out.println(storage);
         System.out.println(dateInProducedd);
-        Map<String, Object> map = new HashMap();
         System.out.println(storage.getGroupName());
         String end;
         Date stard;
@@ -318,7 +325,14 @@ public class StorageAdminController {
                 System.out.println("夜班");
                 System.out.println(stard);
                 System.out.println(endd);
-                map.put("rows", this.storageService.JitaiProduct(storage, (Date)null, stard, endd));
+//                map.put("rows", this.storageService.JitaiProduct(storage, (Date)null, stard, endd));
+                Map<String, Object> map = storageService.JitaiProductt(storage, (Date) null, stard, endd);
+                List list = (List) map.get("rows");
+                Map<String, Object> mp = (Map) list.get(0);
+                for (Map.Entry<String, Object> entry : mp.entrySet()) {
+                    System.out.println(entry.getKey() + "--->" + entry.getValue() + "===>" + entry.getValue().getClass().toString());
+                }
+                return map;
             } catch (ParseException var9) {
                 var9.printStackTrace();
             }
@@ -327,14 +341,20 @@ public class StorageAdminController {
                 Date date = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(dateInProducedd + " 00:00:00");
                 end = dateInProducedd + " 23:59:59";
                 stard = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(end);
-                map.put("rows", this.storageService.JitaiProduct(storage, date, date, stard));
+//                map.put("rows", this.storageService.JitaiProduct(storage, date, date, stard));
+                Map<String, Object> map = storageService.JitaiProductt(storage, date, date, stard);
+                List<Map<String, Object>> list = (List) map.get("rows");
+                Map<String, Object> mp = (Map) list.get(0);
+                for (Map.Entry<String, Object> entry : mp.entrySet()) {
+                    System.out.println(entry.getKey() + "--->" + entry.getValue() + "===>" + entry.getValue().getClass().toString());
+                }
+                return map;
             } catch (ParseException var8) {
                 var8.printStackTrace();
             }
         }
 
-        map.put("success", true);
-        return map;
+        return null;
     }
 
     @RequestMapping({"/kucunzonglan"})
@@ -368,12 +388,13 @@ public class StorageAdminController {
             storage.setGroupName(this.groupService.findById(storage.getGroup().getId()).getName());
         }
 
-        Map<String, Object> map = new HashMap();
-        List<Storage> list = this.storageService.selectEdit(storage, dateInProducedd, page, rows);
-        Long total = this.storageService.getCount(storage, dateInProducedd);
-        map.put("success", true);
-        map.put("rows", list);
-        map.put("total", total);
+//        Map<String, Object> map = new HashMap();
+//        List<Storage> list = this.storageService.selectEdit(storage, dateInProducedd, page, rows);
+        Map<String, Object> map = storageService.selectEditt(storage, dateInProducedd, page, rows);
+//        Long total = this.storageService.getCount(storage, dateInProducedd);
+//        map.put("success", true);
+//        map.put("rows", list);
+//        map.put("total", total);
         return map;
     }
 
@@ -408,7 +429,7 @@ public class StorageAdminController {
         try {
             Date parse = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(date);
 
-            for(int i = 0; i < ids.length; ++i) {
+            for (int i = 0; i < ids.length; ++i) {
                 this.storageService.updateshijian(ids[i], parse);
             }
         } catch (ParseException var5) {
@@ -467,7 +488,7 @@ public class StorageAdminController {
         Integer clerkId = this.clerkService.finName(clerkName).getId();
         Map<String, Object> map = new HashMap();
 
-        for(int i = 0; i < ids.length; ++i) {
+        for (int i = 0; i < ids.length; ++i) {
             this.storageService.updateClerk(ids[i], clerkName, clerkId);
         }
 
@@ -500,7 +521,7 @@ public class StorageAdminController {
         Map<String, Object> map = new HashMap();
         Group group = this.groupService.findByGroupName(banzu);
 
-        for(int i = 0; i < ids.length; ++i) {
+        for (int i = 0; i < ids.length; ++i) {
             this.storageService.updatebanzu(ids[i], banzu, group.getId());
         }
 
@@ -528,7 +549,7 @@ public class StorageAdminController {
 
     @RequestMapping({"/updatehoudu"})
     public String updatehoudu(String houdu, Integer[] idArr) {
-        for(int i = 0; i < idArr.length; ++i) {
+        for (int i = 0; i < idArr.length; ++i) {
             this.storageService.updatehoudu(houdu, idArr[i]);
         }
 

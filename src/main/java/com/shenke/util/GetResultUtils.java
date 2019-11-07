@@ -6,6 +6,7 @@ import org.hibernate.transform.Transformers;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.List;
+import java.util.Map;
 
 public class GetResultUtils {
     //根据sql语句返回list结果集

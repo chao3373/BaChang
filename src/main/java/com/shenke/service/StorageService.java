@@ -138,6 +138,8 @@ public interface StorageService {
 
     public List<Storage> JitaiProduct(Storage storage, java.util.Date date, java.util.Date star, java.util.Date end);
 
+    public Map<String, Object> JitaiProductt(Storage storage, java.util.Date date, java.util.Date star, java.util.Date end);
+
     public List<Storage> KucunSearch(Map<String, Object> map);
 
 
@@ -205,4 +207,6 @@ public interface StorageService {
     Map<String, Object> selecttt(Storage storage, String dateInProducedd, String dateInProduceddd, Integer page, Integer rows);
 
     Map<String, Object> detaill(Map<String, Object> map1);
+
+    Map<String, Object> selectEditt(Storage storage, String dateInProducedd, Integer page, Integer rows);
 }

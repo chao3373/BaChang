@@ -87,41 +87,41 @@
                         title: '仓位',
                         width: 130,
                         align: 'center',
-                        formatter: function (val, row, index) {
-                            if (row.location) {
-                                console.log(val);
-                                console.log(row);
-                                return val.name;
-                            }
-                            return "";
-                        }
+                        // formatter: function (val, row, index) {
+                        //     if (row.location) {
+                        //         console.log(val);
+                        //         console.log(row);
+                        //         return val.name;
+                        //     }
+                        //     return "";
+                        // }
                     }, {
                         field: 'dateInProduced',
                         title: '生产日期',
                         width: 130,
-                        align: 'center',
-                        formatter: function (value, row, index) {
-                            if (value) {
-                                var date = new Date(value);
-                                var o = {
-                                    "M+": date.getMonth() + 1,                 //月份
-                                    "d+": date.getDate(),                    //日
-                                    "h+": date.getHours(),                   //小时
-                                    "m+": date.getMinutes(),                 //分
-                                    "s+": date.getSeconds(),                 //秒
-                                    "q+": Math.floor((date.getMonth() + 3) / 3), //季度
-                                    "S": date.getMilliseconds()             //毫秒
-                                };
-                                if (/(y+)/.test("yyyy-MM-dd hh:mm:ss"))
-                                    var fmt = "yyyy-MM-dd hh:mm:ss".replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
-                                for (var k in o)
-                                    if (new RegExp("(" + k + ")").test(fmt))
-                                        fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-                                return fmt;
-                            } else {
-                                return "";
-                            }
-                        }
+                        align: 'center'
+                        // formatter: function (value, row, index) {
+                        //     if (value) {
+                        //         var date = new Date(value);
+                        //         var o = {
+                        //             "M+": date.getMonth() + 1,                 //月份
+                        //             "d+": date.getDate(),                    //日
+                        //             "h+": date.getHours(),                   //小时
+                        //             "m+": date.getMinutes(),                 //分
+                        //             "s+": date.getSeconds(),                 //秒
+                        //             "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+                        //             "S": date.getMilliseconds()             //毫秒
+                        //         };
+                        //         if (/(y+)/.test("yyyy-MM-dd hh:mm:ss"))
+                        //             var fmt = "yyyy-MM-dd hh:mm:ss".replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+                        //         for (var k in o)
+                        //             if (new RegExp("(" + k + ")").test(fmt))
+                        //                 fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                        //         return fmt;
+                        //     } else {
+                        //         return "";
+                        //     }
+                        // }
                     }, {
                         field: 'state',
                         title: '订单状态',
@@ -387,22 +387,24 @@
                 url: "/admin/storage/JitaiProduct",
                 data: obj,
                 success: function (result) {
-                    console.log(result.rows);
+                    console.log(result);
                     if (result.success) {
                         $("#dg").datagrid('loadData', result.rows);
+                        $("#sumnum").val(result.count);
+                        $("#sumweight").val(result.sumWeight);
                         $.messager.progress('close');
                     }
                 }
             });
-            var sumweight = 0;
-            var sumnum = 0;
-            var a = $("#dg").datagrid("getRows");
-            for (var i = 0; i < a.length; i++) {
-                sumweight += a[i].realityweight;
-                sumnum++;
-            }
-            $("#sumnum").val(sumnum);
-            $("#sumweight").val(sumweight);
+            // var sumweight = 0;
+            // var sumnum = 0;
+            // var a = $("#dg").datagrid("getRows");
+            // for (var i = 0; i < a.length; i++) {
+            //     sumweight += a[i].realityweight;
+            //     sumnum++;
+            // // }
+            // $("#sumnum").val(sumnum);
+            // $("#sumweight").val(sumweight);
         }
 
         //设置仓位
