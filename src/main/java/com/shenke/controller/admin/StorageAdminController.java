@@ -327,11 +327,6 @@ public class StorageAdminController {
                 System.out.println(endd);
 //                map.put("rows", this.storageService.JitaiProduct(storage, (Date)null, stard, endd));
                 Map<String, Object> map = storageService.JitaiProductt(storage, (Date) null, stard, endd);
-                List list = (List) map.get("rows");
-                Map<String, Object> mp = (Map) list.get(0);
-                for (Map.Entry<String, Object> entry : mp.entrySet()) {
-                    System.out.println(entry.getKey() + "--->" + entry.getValue() + "===>" + entry.getValue().getClass().toString());
-                }
                 return map;
             } catch (ParseException var9) {
                 var9.printStackTrace();
@@ -343,11 +338,6 @@ public class StorageAdminController {
                 stard = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(end);
 //                map.put("rows", this.storageService.JitaiProduct(storage, date, date, stard));
                 Map<String, Object> map = storageService.JitaiProductt(storage, date, date, stard);
-                List<Map<String, Object>> list = (List) map.get("rows");
-                Map<String, Object> mp = (Map) list.get(0);
-                for (Map.Entry<String, Object> entry : mp.entrySet()) {
-                    System.out.println(entry.getKey() + "--->" + entry.getValue() + "===>" + entry.getValue().getClass().toString());
-                }
                 return map;
             } catch (ParseException var8) {
                 var8.printStackTrace();
