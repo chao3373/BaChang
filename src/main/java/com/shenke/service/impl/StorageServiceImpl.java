@@ -978,7 +978,7 @@ public class StorageServiceImpl implements StorageService {
                 "group_name as groupName, " +
                 "b.name as location, " +
                 "ji_tai_name as jitai, " +
-                "state from t_storage a inner join t_location b on a.location_id = b.id where true ";
+                "state from t_storage a left join t_location b on a.location_id = b.id where true ";
 
         String sql = "";
         String pg = "";
@@ -1019,6 +1019,9 @@ public class StorageServiceImpl implements StorageService {
             String star = dateInProducedd + " 00:00:00";
             String end = dateInProducedd + " 23:59:59";
             sql += " and a.date_in_produced BETWEEN '" + star + "' and '" + end + "'";
+        }
+        if (storage.getGroup() != null) {
+            sql += " and a.group_name = '" + storage.getGroup().getName() + "'";
         }
         if (storage.getClerk() != null) {
             sql += " and a.clerk_id = " + storage.getId();
